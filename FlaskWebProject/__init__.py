@@ -10,7 +10,7 @@ from flask_session import Session
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.logger.setLevel(logging.DEBUG)
+app.logger.setLevel(logging.os.environ.get("LOGLEVEL"))
 Session(app)
 db = SQLAlchemy(app)
 login = LoginManager(app)

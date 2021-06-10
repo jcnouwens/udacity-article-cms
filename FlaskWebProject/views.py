@@ -23,7 +23,8 @@ def home():
     return render_template(
         'index.html',
         title='Home Page',
-        posts=posts
+        posts=posts,
+        log='info'
     )
 
 @app.route('/new_post', methods=['GET', 'POST'])
@@ -38,7 +39,8 @@ def new_post():
         'post.html',
         title='Create Post',
         imageSource=imageCont,
-        form=form
+        form=form,
+        log='info'
     )
 
 
@@ -54,7 +56,8 @@ def post(id):
         'post.html',
         title='Edit Post',
         imageSource=imageCont,
-        form=form
+        form=form,
+        log='info'
     )
 
 
@@ -77,7 +80,13 @@ def login():
         return redirect(next_page)
     session["state"] = str(uuid.uuid4())
     auth_url = _build_auth_url(scopes=Config.SCOPE, state=session["state"])
-    return render_template('login.html', title='Sign In', form=form, auth_url=auth_url)
+    return render_template(
+        'login.html',
+        title='Sign In',
+        form=form,
+        auth_url=auth_url,
+        log='info'
+    )
 
 
 @app.route(Config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
@@ -86,7 +95,11 @@ def authorized():
         return redirect(url_for("home"))  # No-OP. Goes back to Index page
     if "error" in request.args:  # Authentication/Authorization failure
         app.logger.info('Invalid login attempt using microsoft account.')
-        return render_template("auth_error.html", result=request.args)
+        return render_template(
+            "auth_error.html",
+            result=request.args,
+            log='info'
+        )
     if request.args.get('code'):
         cache = _load_cache()
         # Acquire a token from a built msal app, along with the appropriate redirect URI
@@ -95,7 +108,11 @@ def authorized():
             scopes=Config.SCOPE,
             redirect_uri=url_for('authorized', _external=True, _scheme='https'))
         if "error" in result:
-            return render_template("auth_error.html", result=result)
+            return render_template(
+                "auth_error.html",
+                result=result,
+                log='info'
+            )
         session["user"] = result.get("id_token_claims")
         # Note: In a real app, we'd use the 'name' property from session["user"] below
         # Here, we'll use the admin username for anyone who is authenticated by MS
